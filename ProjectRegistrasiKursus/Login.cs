@@ -19,46 +19,56 @@ namespace ProjectRegistrasiKursus
                 MessageBox.Show("Username dan Password harus diisikan.", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
-            using (MySqlConnection conn = new MySqlConnection(DBConfig.ConnStr))
+            else
             {
-                try
+                using (MySqlConnection conn = new MySqlConnection(DBConfig.ConnStr))
                 {
-                    conn.Open();
-                    string query = "SELECT password FROM pengguna WHERE username = @username";
-                    MySqlCommand cmd = new MySqlCommand(query, conn);
-                    cmd.Parameters.AddWithValue("@username", username);
-
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    try
                     {
-                        if (reader.Read())
-                        {
-                            string hashFromDb = reader.GetString("password");
-                            bool isValid = BCrypt.Net.BCrypt.Verify(password, hashFromDb);
+                        conn.Open();
+                        string query = "SELECT password FROM pengguna WHERE username = @username";
+                        MySqlCommand cmd = new MySqlCommand(query, conn);
+                        cmd.Parameters.AddWithValue("@username", username);
 
-                            if (isValid)
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
                             {
-                                MessageBox.Show("Login berhasil!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                this.Hide();
-                                Regis objRegis = new Regis();
-                                objRegis.Show();
+                                string hashFromDb = reader.GetString("password");
+                                bool isValid = BCrypt.Net.BCrypt.Verify(password, hashFromDb);
+
+                                if (isValid)
+                                {
+                                    MessageBox.Show("Login berhasil!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    this.Hide();
+                                    Main obMain = new Main();
+                                    obMain.Show();
+
+                                    /* Regis objRegis = new Regis();
+                                     objRegis.Show(); */
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Password salah!", "Login Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                }
                             }
                             else
                             {
-                                MessageBox.Show("Password salah!", "Login Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show("Username tidak ditemukan!", "Login Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
-                        else
-                        {
-                            MessageBox.Show("Username tidak ditemukan!", "Login Gagal", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Terjadi kesalahan koneksi:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Terjadi kesalahan koneksi:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
             }
+        }
+
+        private void Login_Load(object sender, EventArgs e)
+        {
+
         }
 
 
